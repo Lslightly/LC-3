@@ -22,7 +22,7 @@ typedef vector<Code> Codevec;
 typedef bool (*OpCodeFuncs)(Code &, table &, ostream &);
 bool pass1(ifstream &fin, table &SymbolTable, Codevec &code);
 
-bool CodeSeparate(string codeline, vector<string> &codeparts);
+bool CodeSeparate(string codeline, vector<string> &codeparts, size_t LC);
 
 bool CreateSymbolTable(vector<string> &codeparts, table &SymbolTable, size_t LC, long &PC, Codevec &code);
 
@@ -87,90 +87,168 @@ map<string, string> HtoB = { //  Hex to Binary string
 vector<string> OpCode = {"ADD", "AND", "JMP", "JSR", "JSRR", "LD", "LDI", "LDR", "LEA",
                          "NOT", "RET", "RTI", "ST", "STI", "STR", "TRAP",
                          "BR", "BRz", "BRn", "BRp", "BRzp", "BRnz", "BRnp", "BRnzp",
-                         "HALT", "OUT", "GETC", "PUTS", "IN", "PUTSP"};
+                         "HALT", "OUT", "GETC", "PUTS", "IN", "PUTSP",
+                         "add", "and", "jmp", "jsr", "jsrr", "ld", "ldi", "ldr", "lea",
+                         "not", "ret", "rti", "st", "sti", "str", "trap",
+                         "br", "brz", "brn", "brp", "brzp", "brnz", "brnp", "brnzp",
+                         "halt", "out", "getc", "puts", "in", "putsp",
+                         };
 
 //  map between assembly to binary code
 map<string, string> mapAsmBin = {
     {"ADD", "0001"},
+    {"add", "0001"},
     {"AND", "0101"},
+    {"and", "0101"},
     {"BR", "0000111"},
+    {"br", "0000111"},
     {"JMP", "1100000"},
+    {"jmp", "1100000"},
     {"JSR", "01001"},
+    {"jsr", "01001"},
     {"JSRR", "0100000"},
+    {"jsrr", "0100000"},
     {"LD", "0010"},
+    {"ld", "0010"},
     {"LDI", "1010"},
+    {"ldi", "1010"},
     {"LDR", "0110"},
+    {"ldr", "0110"},
     {"LEA", "1110"},
+    {"lea", "1110"},
     {"NOT", "1001"},
+    {"not", "1001"},
     {"RET", "1100000111000000"},
+    {"ret", "1100000111000000"},
     {"RTI", "1000000000000000"},
+    {"rti", "1000000000000000"},
     {"ST", "0011"},
+    {"st", "0011"},
     {"STI", "1011"},
+    {"sti", "1011"},
     {"STR", "0111"},
+    {"str", "0111"},
     {"TRAP", "11110000"},
+    {"trap", "11110000"},
     {"BRz", "0000010"},
+    {"brz", "0000010"},
     {"BRn", "0000100"},
+    {"brn", "0000100"},
     {"BRp", "0000001"},
+    {"brp", "0000001"},
     {"BRzp", "0000011"},
+    {"brzp", "0000011"},
     {"BRnz", "0000110"},
+    {"brnz", "0000110"},
     {"BRnp", "0000101"},
+    {"brnp", "0000101"},
     {"BRnzp", "0000111"},
+    {"brnzp", "0000111"},
     {"BR", "0000111"},
+    {"br", "0000111"},
     {"GETC", "1111000000100000"},
+    {"getc", "1111000000100000"},
     {"OUT", "1111000000100001"},
+    {"out", "1111000000100001"},
     {"PUTS", "1111000000100010"},
+    {"puts", "1111000000100010"},
     {"IN", "1111000000100011"},
+    {"in", "1111000000100011"},
     {"PUTSP", "1111000000100100"},
-    {"HALT", "1111000000100101"}};
+    {"putsp", "1111000000100100"},
+    {"HALT", "1111000000100101"},
+    {"halt", "1111000000100101"}};
 
 //  map between Opcode and functions to operate
 map<string, OpCodeFuncs> Funcs = {
     {"ADD", &ADD},
+    {"add", &ADD},
     {"AND", &ADD},
+    {"and", &ADD},
     {"BR", &BR},
+    {"br", &BR},
     {"BRn", &BR},
+    {"brn", &BR},
     {"BRz", &BR},
+    {"brz", &BR},
     {"BRp", &BR},
+    {"brp", &BR},
     {"BRnz", &BR},
+    {"brnz", &BR},
     {"BRnp", &BR},
+    {"brnp", &BR},
     {"BRzp", &BR},
+    {"brzp", &BR},
     {"BRnzp", &BR},
+    {"brnzp", &BR},
     {"JMP", &JMP},
+    {"jmp", &JMP},
     {"JSR", &JSR},
+    {"jsr", &JSR},
     {"JSRR", &JSRR},
+    {"jsrr", &JSRR},
     {"LD", &LD},
+    {"ld", &LD},
     {"LDI", &LD},
+    {"ldi", &LD},
     {"LDR", &LDR},
+    {"ldr", &LDR},
     {"LEA", &LEA},
+    {"lea", &LEA},
     {"NOT", &NOT},
+    {"not", &NOT},
     {"RET", &RET},
+    {"ret", &RET},
     {"RTI", &RET},
+    {"rti", &RET},
     {"ST", &LD},
+    {"st", &LD},
     {"STI", &LD},
+    {"sti", &LD},
     {"STR", &LDR},
+    {"str", &LDR},
     {"TRAP", &TRAP},
+    {"trap", &TRAP},
     {".STRINGZ", &STRINGZ},
+    {".stringz", &STRINGZ},
     {".FILL", &FILL},
+    {".fill", &FILL},
     {".BLKW", &BLKW},
+    {".blkw", &BLKW},
     {".ORIG", &ORIG},
+    {".orig", &ORIG},
     {"HALT", &HALT},
+    {"halt", &HALT},
     {"OUT", &HALT},
+    {"out", &HALT},
     {"GETC", &HALT},
+    {"getc", &HALT},
     {"PUTSP", &HALT},
+    {"putsp", &HALT},
     {"PUTS", &HALT},
-    {"IN", &HALT}
+    {"puts", &HALT},
+    {"IN", &HALT},
+    {"in", &HALT}
 };
 
 //  map between registers to binary code
 map<string, string> RegisterMap = {
     {"R1", "001"},
+    {"r1", "001"},
     {"R2", "010"},
+    {"r2", "010"},
     {"R3", "011"},
+    {"r3", "011"},
     {"R4", "100"},
+    {"r4", "100"},
     {"R5", "101"},
+    {"r5", "101"},
     {"R6", "110"},
+    {"r6", "110"},
     {"R7", "111"},
+    {"r7", "111"},
     {"R0", "000"},
+    {"r0", "000"},
 };
 int main(int argc, char **args)
 {
@@ -224,7 +302,7 @@ bool pass1(ifstream &fin, table &SymbolTable, Codevec &code)
                 codeline = codeline.substr(notspacei);
             }
 
-            if (!CodeSeparate(codeline, codeparts)) return false;
+            if (!CodeSeparate(codeline, codeparts, LC)) return false;
             if (codeparts[0] == ".ORIG")
                 pro_start = true;
             if (codeparts[0] == ".END")
@@ -253,7 +331,7 @@ bool pass1(ifstream &fin, table &SymbolTable, Codevec &code)
     return true;
 }
 
-bool CodeSeparate(string codeline, vector<string> &codeparts) //  以空格和,为间隔分开字符串到parts
+bool CodeSeparate(string codeline, vector<string> &codeparts, size_t LC) //  以空格和,为间隔分开字符串到parts
 {
     codeparts.clear();
     string separators = " ,\t\r\n";
@@ -274,7 +352,7 @@ bool CodeSeparate(string codeline, vector<string> &codeparts) //  以空格和,�
         {
             if (count(codeline.begin() + start, codeline.end(), '\"') == 1)
             {
-                cout << "Invalid string.\n";
+                cout << "line " << LC << ": Invalid string.\n";
                 return false;
             }
             else
@@ -673,11 +751,12 @@ bool FILL(Code &code, table &SymbolTable, ostream &fout)
     {
         string bimm;
         long dimm;
-        if (!ImmToBinary(code.codeparts[1], 16, bimm, dimm))
+        if (!ImmToBinary(code.codeparts[1], 17, bimm, dimm))
         {
             cout << "line " << code.LC << ": incorrect FILL format.\n";
+            return false;
         }
-        fout << bimm << endl;
+        fout << bimm.substr(1) << endl;
         return true;
     }
 }
@@ -692,7 +771,7 @@ bool BLKW(Code &code, table &SymbolTable, ostream &fout)
     {
         string bimm;
         long dimm;
-        ImmToBinary(code.codeparts[1], 16, bimm, dimm);
+        ImmToBinary(code.codeparts[1], 17, bimm, dimm);
         for (int i = 0; i < dimm; i++)
         {
             fout << "0000000000000000" << endl;
@@ -704,12 +783,12 @@ bool ORIG(Code &code, table &SymbolTable, ostream &fout)
 {
     string bimm;
     long dimm;
-    if (!ImmToBinary(code.codeparts[1], 16, bimm, dimm))
+    if (!ImmToBinary(code.codeparts[1], 17, bimm, dimm))
     {
         cout << "line " << code.LC << ": invalid addr.\n";
         return false;
     }
-    fout << bimm << endl;
+    fout << bimm.substr(1) << endl;
     return true;
 }
 //  imm为任意类型的数字字符串,需要有前缀，bits为限制位，包括符号位，bimm为转化之后的bit位的字符串，dimm为十进制实际值
@@ -779,7 +858,7 @@ bool ImmToBinary(string imm, int bits, string &bimm, long &dimm)
         return false;
     else
     {
-        bimm = bitset<16>(dimm).to_string();
+        bimm = bitset<17>(dimm).to_string();
         bimm = bimm.substr(bimm.length() - bits);
         return true;
     }
@@ -806,7 +885,11 @@ bool LabelOrImm(Code &code, table &SymbolTable, ostream &fout, int bitlimit)
     if (SymbolTable.find(code.codeparts[code.codeparts.size() - 1]) == SymbolTable.end()) //  是数字形式
     {
         string temp;
-        ImmToBinary(code.codeparts[code.codeparts.size() - 1], 16, temp, num_offset); //  首先得到dimm，即目标
+        if (!ImmToBinary(code.codeparts[code.codeparts.size() - 1], 16, temp, num_offset))
+        {
+            cout << "line " << code.LC << ": no \"" << code.codeparts[code.codeparts.size()-1] << "\" label.\n";
+            return false;
+        }
         if (!OffsetInRange(num_offset, bitlimit))
         {
             cout << "line " << code.LC << ": PCoffset out of range.\n";

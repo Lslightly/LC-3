@@ -1,4 +1,3 @@
-
             .ORIG x3000
             LD R0, HEAD     ;   R0  head of the Link List
 LOOP        ADD R2, R0, #0  ;   R2  p_pre = head

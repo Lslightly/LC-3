@@ -47,8 +47,8 @@ TEST        LD R0, VEC
         STI R0, KBSR
 
         ; (3) Set up system stack to enter user space.
-        LD R0, PSR
-        ADD R6, R6, #-1
+        LD R0, PL
+        ADD R6, R6, x30 
         STR R0, R6, #0
         LD R0, PC
         ADD R6, R6, #-1

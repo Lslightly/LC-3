@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "nim.asm"
+                "examples/nim.asm"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

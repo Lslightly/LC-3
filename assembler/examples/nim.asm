@@ -1,23 +1,23 @@
 .ORIG	x3000
-INIT    AND R0,R0,#0
-        ADD R1,R0,#0
-        ADD R2,R0,#0
-        ADD R3,R0,#0
-        ADD R4,R0,#3
-        ADD R5,R0,#5
-        ADD R6,R0,#8   
-        LEA R0,PLAYER
-        STR R3,R0,#0
-        JSR STATEOUT
+INIT    and r0,R0,#0
+        add R1,R0,#0
+        add R2,R0,#0
+        add R3,R0,#0
+        add R4,R0,#3
+        add R5,R0,#5
+        add R6,R0,#8   
+        lea R0,PLAYER
+        str R3,R0,#0
+        jsr STATEOUT
 
-GETIN       JSR PLAYERCALL
-            GETC
-            OUT
-            LD R1,PAPHA
-            ADD R1,R1,R0
-            GETC
-            OUT
-            LD R2,PNUMB0
+GETIN       jsr PLAYERCALL
+            getc
+            out
+            ld R1,PAPHA
+            add R1,R1,R0
+            getc
+            out
+            ld R2,PNUMB0
             ADD R2,R2,R0
             LD R0,NEWLINE
             OUT
